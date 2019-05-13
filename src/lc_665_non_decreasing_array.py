@@ -29,7 +29,7 @@ class Solution:
                 return True
             last = i
         return False
-    
+
     @staticmethod
     def decreases_consecutively(li):
         dec_counter = 0
@@ -43,8 +43,8 @@ class Solution:
                 return True
             last = i
         return False
-        
-    def checkPossibility(self, nums: List[int]) -> bool:
+
+    def checkPossibility(self, nums):
         if not self.ever_decreases(nums):
             return True
         if self.decreases_consecutively(nums):
@@ -60,8 +60,8 @@ class Solution:
 if __name__ == '__main__':
     sol = Solution()
     test_cases = (
-        [4,2,3],
-        [4,2,1])
+        [4, 2, 3],
+        [4, 2, 1])
     for case in test_cases:
         print('Input: {}\nOutput: {}\n------------'
               .format(case, sol.checkPossibility(case)))
