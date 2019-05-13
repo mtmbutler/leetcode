@@ -1,5 +1,5 @@
 """
-https://leetcode.com/problems/longest-substring-without-repeating-characters/description/
+https://leetcode.com/problems/longest-substring-without-repeating-characters
 
 Given a string, find the length of the longest substring without repeating characters.
 
@@ -16,17 +16,12 @@ Examples:
 
 class Solution:
     def lengthOfLongestSubstring(self, s):
-        """
-        :type s: str
-        :rtype: int
-        """
-        if len(s) == 0:
+        if not s:
             return 0
 
-        li = [ch for ch in s]
         sub = []
         length = 1
-        for ch in li:
+        for ch in s:
             if ch in sub:
                 length = len(sub) if len(sub) > length else length
                 sub = sub[sub.index(ch) + 1:]
@@ -37,14 +32,14 @@ class Solution:
         return max(length, len(sub))
 
 
-def main():
-    """Summary"""
-    sol = Solution()
-    test_cases = ['abcabcbb', 'bbbbb', 'pwwkew', 'dvdf']
-    for case in test_cases:
-        print('Input: {}\nOutput: {}\n------------'
-              .format(case, sol.lengthOfLongestSubstring(case)))
-
-
 if __name__ == '__main__':
-    main()
+    sol = Solution()
+    test_cases = (
+        ('abcabcbb', 3),
+        ('bbbbb', 1),
+        ('pwwkew', 3),
+        ('dvdf', 3),
+        ('', 0),
+        ('a', 1))
+    for arg, out in test_cases:
+        assert sol.lengthOfLongestSubstring(arg) == out
