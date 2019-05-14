@@ -1,5 +1,5 @@
 """
-https://leetcode.com/problems/longest-common-prefix/description/
+https://leetcode.com/problems/longest-common-prefix
 
 Write a function to find the longest common prefix string amongst an
 array of strings.
@@ -25,40 +25,39 @@ All given inputs are in lowercase letters a-z.
 
 class Solution:
     def longestCommonPrefix(self, strs):
-        """
-        :type strs: List[str]
-        :rtype: str
-        """
         # Catch empty case
         if not strs:
             return ""
 
         # Get smallest word length to know the longest possible prefix
-        shortest_length = len(min(strs, key=len))
+        shortest_str = min(strs, key=len)
 
         # Iterate over prefices to see matches
-        longest_prefix = ""
-        for i in range(shortest_length):
-            prefices = [word[:i + 1] for word in strs]
-            prfcs_match = len(set(prefices)) == 1
-            if prfcs_match:
-                longest_prefix = prefices[0]
-        return longest_prefix
+        longest_prefix = []
+        for i, ch in enumerate(shortest_str):
+            different = False
+            for s in strs:
+                if s[i] != ch:
+                    different = True
+                    break
+            if different:
+                break
+            longest_prefix.append(ch)
 
-
-def main():
-    sol = Solution()
-    test_cases = [[],
-                  ["a"],
-                  ["ababklaj;lasbn"],
-                  ["c", "c"],
-                  ["", "hi"],
-                  ["flower", "flow", "flight"],
-                  ["dog", "racecar", "car"]]
-    for case in test_cases:
-        print('Input: {}\nOutput: {}\n------------'
-              .format(case, sol.longestCommonPrefix(case)))
+        return ''.join(longest_prefix)
 
 
 if __name__ == '__main__':
-    main()
+    sol = Solution()
+    test_cases = (
+        ([], ''),
+        (['a'], 'a'),
+        (['ababklaj;lasbn'], 'ababklaj;lasbn'),
+        (['c', 'c'], 'c'),
+        (['', 'hi'], ''),
+        (['flower', 'flow', 'flight'], 'fl'),
+        (['dog', 'racecar', 'car'], ''))
+    for arg, out in test_cases:
+        result = sol.longestCommonPrefix(arg)
+        print(arg, result, out)
+        assert result == out
