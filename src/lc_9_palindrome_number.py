@@ -29,25 +29,18 @@ Coud you solve it without converting the integer to a string?
 
 
 class Solution:
-    def ndigits(self, x):
-        if x < 10:
-            return 1
-        return self.ndigits(x // 10) + 1
-
     def isPalindrome(self, x):
-        if x < 0:
-            return False
-        elif x < 10:
+        if 0 <= x < 10:
             return True
-        else:
-            ndigits = self.ndigits(x)
-            place = 10 ** (ndigits - 1)
-            li = []
-            while place > 0:
-                li.append(x // place)
-                x -= li[-1] * place
-                place //= 10
-            return li == li[::-1]
+        elif x < 0 or x % 10 == 0:
+            return False
+        flipped = 0
+        while x > flipped:
+            flipped = flipped * 10 + (x % 10)
+            x //= 10
+            if flipped in (x, x // 10):
+                return True
+        return False
 
 
 if __name__ == '__main__':
@@ -70,4 +63,5 @@ if __name__ == '__main__':
         (132, False))
     for arg, out in test_cases:
         result = sol.isPalindrome(arg)
+        print(arg, result, out)
         assert result == out
