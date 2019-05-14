@@ -1,5 +1,8 @@
 """
-https://leetcode.com/problems/palindrome-number/description/
+https://leetcode.com/problems/palindrome-number
+
+Determine whether an integer is a palindrome. An integer is a palindrome
+when it reads the same backward as forward.
 
 Example 1:
 
@@ -26,24 +29,45 @@ Coud you solve it without converting the integer to a string?
 
 
 class Solution:
+    def ndigits(self, x):
+        if x < 10:
+            return 1
+        return self.ndigits(x // 10) + 1
+
     def isPalindrome(self, x):
-        """
-        :type x: int
-        :rtype: bool
-        """
-        orig = str(x)
-        rev = orig[::-1]
-        return orig == rev
+        if x < 0:
+            return False
+        elif x < 10:
+            return True
+        else:
+            ndigits = self.ndigits(x)
+            place = 10 ** (ndigits - 1)
+            li = []
+            while place > 0:
+                li.append(x // place)
+                x -= li[-1] * place
+                place //= 10
+            return li == li[::-1]
 
-
-def main():
-    """Summary
-    """
-    sol = Solution()
-    test_cases = [121, -121, 10]
-    for case in test_cases:
-        print('Input: {}\nOutput: {}\n------------'
-              .format(case, sol.isPalindrome(case)))
 
 if __name__ == '__main__':
-    main()
+    sol = Solution()
+    test_cases = (
+        (121, True),
+        (-121, False),
+        (10, False),
+        (0, True),
+        (632236, True),
+        (163, False),
+        (112, False),
+        (412, False),
+        (634, False),
+        (679976, True),
+        (108, False),
+        (822, False),
+        (348, False),
+        (658856, True),
+        (132, False))
+    for arg, out in test_cases:
+        result = sol.isPalindrome(arg)
+        assert result == out

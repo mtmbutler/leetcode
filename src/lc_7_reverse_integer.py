@@ -1,41 +1,58 @@
-#class Solution:
-def reverse(x):
-    """
-    :type x: int
-    :rtype: int
+"""
+https://leetcode.com/problems/reverse-integer
 
-    Given a signed int, returns an int with the digits reversed.
-    """
-    # Create a string of x
-    x_str = str(x)
+Given a 32-bit signed integer, reverse digits of an integer.
 
-    # Create a list of x's digits
-    dig_list = []
-    for char in x_str:
-        dig_list.append(char)
+Example 1:
 
-    # Control for negative numbers
-    if dig_list[0] == '-':
-        dig_list = dig_list[1:]
-        neg = True
-    else:
-        neg = False
+Input: 123
+Output: 321
 
-    # Create a return string and load it with x's digits in reverse order
-    ret_str = ''
-    for i in range(len(dig_list)):
-        ret_str += dig_list[len(dig_list) - 1 - i]
+Example 2:
 
-    # Add negative sign if necessary
-    if neg:
-        ret_str = '-' + ret_str
+Input: -123
+Output: -321
 
-    # Return the reversed number, conditional on overflow
-    if float(ret_str) > 2**31 or float(ret_str) < -1*2**31:
-        return 0
-    else:
-        return int(ret_str)
+Example 3:
+
+Input: 120
+Output: 21
+
+Note:
+Assume we are dealing with an environment which could only store
+integers within the 32-bit signed integer range: [−231,  231 − 1]. For
+the purpose of this problem, assume that your function returns 0 when
+the reversed integer overflows.
+"""
+
+
+class Solution:
+    def reverse(self, x):
+        # Create a list of x's digits
+        digits = str(x)
+
+        # Control for negative numbers
+        neg = digits[0] == '-'
+        if neg:
+            digits = digits[1:]
+
+        # Reverse the integer
+        rvrsd = int(digits[::-1]) * (-1 if neg else 1)
+
+        # Return the reversed number, conditional on overflow
+        if not -(2**31) <= rvrsd <= 2**31:
+            return 0
+        else:
+            return rvrsd
+
 
 if __name__ == '__main__':
-    num_to_reverse = 123
-    print('Reversing {}: {}'.format(num_to_reverse, reverse(num_to_reverse)))
+    sol = Solution()
+    test_cases = (
+        (123, 321),
+        (-123, -321),
+        (120, 21))
+    for arg, out in test_cases:
+        result = sol.reverse(arg)
+        print(arg, result, out)
+        assert result == out
