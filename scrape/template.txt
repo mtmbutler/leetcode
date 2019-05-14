@@ -1,0 +1,19 @@
+"""
+{url}
+
+{description}
+"""
+
+
+{code_skeleton}pass
+
+
+if __name__ == '__main__':
+    sol = Solution()
+    test_cases = (
+        {test_cases}
+    )
+    for arg, out in test_cases:
+        result = sol.{method_name}(arg)
+        print(arg, result, out)
+        assert result == out
