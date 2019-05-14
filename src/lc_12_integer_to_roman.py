@@ -1,5 +1,5 @@
 """
-https://leetcode.com/problems/integer-to-roman/description/
+https://leetcode.com/problems/integer-to-roman
 
 Roman numerals are represented by seven different symbols: I, V, X, L,
 C, D and M.
@@ -75,11 +75,11 @@ class Solution:
             one, five, ten = d[order]
             if digit == 9:
                 return one + ten
-            elif digit in [5, 6, 7, 8]:
+            elif digit in (5, 6, 7, 8):
                 return five + one * (digit % 5)
             elif digit == 4:
                 return one + five
-            elif digit in [0, 1, 2, 3]:
+            elif digit in (0, 1, 2, 3):
                 return one * (digit % 5)
             else:
                 print(f'Something odd happened with digit = {digit}.')
@@ -88,30 +88,23 @@ class Solution:
             return 'M' * (digit * 10**(order - 3))
 
     def intToRoman(self, num):
-        """
-        :type num: int
-        :rtype: str
-        """
-        li = list(str(num))
-        li.reverse()
-        out_li = []
-
-        for order in range(len(li)):
-            out_li.append(self.get_roman_digit(int(li[order]), order))
-
-        out_li.reverse()
-        return ''.join(out_li)
-
-
-def main():
-    """Summary
-    """
-    sol = Solution()
-    test_cases = [3, 4, 9, 58, 1994]
-    for case in test_cases:
-        print('Input: {}\nOutput: {}\n------------'
-              .format(case, sol.intToRoman(case)))
+        rvrsed = str(num)[::-1]
+        rvrsed_romans = [
+            self.get_roman_digit(int(digit), order)
+            for order, digit in enumerate(rvrsed)]
+        return ''.join(rvrsed_romans[::-1])
 
 
 if __name__ == '__main__':
-    main()
+    sol = Solution()
+    test_cases = (
+        (3, 'III'),
+        (4, 'IV'),
+        (9, 'IX'),
+        (58, 'LVIII'),
+        (1994, 'MCMXCIV')
+    )
+    for arg, out in test_cases:
+        result = sol.intToRoman(arg)
+        print(arg, result, out)
+        assert result == out
