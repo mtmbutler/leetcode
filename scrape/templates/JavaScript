@@ -1,0 +1,23 @@
+/*
+{url}
+
+{description}
+*/
+const _ = require("underscore");
+
+{code_skeleton}
+
+
+if (typeof module != 'undefined' && !module.parent) {{
+    const test_cases = [
+        {test_cases}
+    ];
+    for (let case_ of test_cases) {{
+        let arg = case_[0];
+        let out = case_[1];
+        console.log(arg, out);
+        let result = {method_name}(arg);
+        console.log(result);
+        console.assert(_.isEqual(result, out));
+    }}
+}}

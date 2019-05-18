@@ -30,6 +30,17 @@ with open(CONF_PATH) as conf:
 LANGUAGES = (
     'C++', 'Java', 'Python', 'Python3', 'C', 'C#', 'JavaScript',
     'Ruby', 'Swift', 'Go', 'Scala', 'Kotlin', 'Rust', 'PHP')
+EXTENSIONS = (
+    'c', 'java', 'py', 'py', 'c', 'cs', 'js',
+    'rb', 'swift', 'go', 'scala', 'kt', 'rs', 'php')
+FUNCTION_SIGS = (
+    '', '',
+    r'def ([^ ^_]+)\(',
+    r'def ([^ ^_]+)\(',
+    '', '',
+    r'var ([^ ^_]+) = function',
+    '', '', '', '', '', '', ''
+)
 
 
 class LeetCodeScraper:
@@ -101,7 +112,8 @@ class LeetCodeScraper:
 
         # Write file
         lcp = LeetCodeProblem(
-            id_, name, driver.current_url, description, code_skeleton)
+            id_, name, driver.current_url, description, code_skeleton,
+            lang=self.lang)
         out_path = lcp.write_file()
 
         # Close browser
@@ -119,12 +131,14 @@ class LeetCodeScraper:
 
 
 class LeetCodeProblem:
-    def __init__(self, id_, name, url, description, code_skeleton):
+    def __init__(self, id_, name, url, description, code_skeleton,
+                 lang='Python3'):
         self.id = id_
         self.name = self.process_name(name)
         self.url = url
         self.description = self.parse_description(description)
         self.code_skeleton = code_skeleton
+        self.lang = lang
 
         # Calculated
         self.method_name = self.method_name()
@@ -132,7 +146,7 @@ class LeetCodeProblem:
 
     def method_name(self):
         """Parse the method name from the code skeleton."""
-        p = r'def ([^ ^_]+)\('
+        p = dict(zip(LANGUAGES, FUNCTION_SIGS)).get(self.lang)
         try:
             return re.search(p, self.code_skeleton)[1]
         except (TypeError, IndexError):
@@ -149,7 +163,7 @@ class LeetCodeProblem:
                     test_cases[-1].append(self.parse_io(line))
                 except IndexError:
                     pass
-        s = ',\n        '.join(str(tuple(pair)) for pair in test_cases)
+        s = ',\n        '.join(str(pair) for pair in test_cases)
         return s
 
     @staticmethod
@@ -188,9 +202,10 @@ class LeetCodeProblem:
     def process_name(name):
         return name.strip().lower().replace(' ', '_').replace('-', '_')
 
-    def write_file(self, lang='Python3'):
-        filename = f'lc_{self.id}_{self.name}.py'
-        template_path = os.path.join(TEMPLATE_DIR, lang)
+    def write_file(self):
+        ext = dict(zip(LANGUAGES, EXTENSIONS)).get(self.lang)
+        filename = f'lc_{self.id}_{self.name}.{ext}'
+        template_path = os.path.join(TEMPLATE_DIR, self.lang)
         with open(template_path) as f:
             template = f.read()
 
