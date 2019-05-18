@@ -1,16 +1,16 @@
+import argparse
 import json
 import os
 import re
 import textwrap
 import time
-from getpass import getuser
+import yaml
 from glob import glob
 
 from selenium import webdriver
 from selenium.common.exceptions import (
     NoSuchElementException, ElementClickInterceptedException)
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
 
 # Find directories and files
 try:
@@ -19,26 +19,42 @@ try:
 except NameError:  # Running interactively from repo root
     REPO_DIR = os.path.join(os.getcwd())
 SOL_DIR = os.path.join(REPO_DIR, 'solutions')
-TEMPLATE_PATH = os.path.join(REPO_DIR, 'scrape', 'template.txt')
+TEMPLATE_DIR = os.path.join(REPO_DIR, 'scrape', 'templates')
+CONF_PATH = os.path.join(REPO_DIR, 'scrape', 'conf.yaml')
+
+# Handle conf
+with open(CONF_PATH) as conf:
+    GECKO_DRIVER_PATH = yaml.safe_load(conf).get('GECKO_DRIVER_PATH')
+
+# Order of languages
+LANGUAGES = (
+    'C++', 'Java', 'Python', 'Python3', 'C', 'C#', 'JavaScript',
+    'Ruby', 'Swift', 'Go', 'Scala', 'Kotlin', 'Rust', 'PHP')
 
 
 class LeetCodeScraper:
     RANDOM_PROBLEM_URL = (
         "https://leetcode.com/problems/random-one-question/all")
-    GECKO_DRIVER_PATH = (
-        f"C:/Users/{getuser()}/Downloads/geckodriver.exe")
     MAX_TRIES = 5
 
-    def __init__(self):
+    def __init__(self, lang='Python3', url=None):
         self.driver = webdriver.Firefox(
-            executable_path=self.GECKO_DRIVER_PATH)
+            executable_path=GECKO_DRIVER_PATH)
+        if lang not in LANGUAGES:
+            raise ValueError(f"Invalid language: {lang}")
+        self.lang = lang
+        self.url = url
+
+    @property
+    def lang_ix(self):
+        return LANGUAGES.index(self.lang)
 
     def goto_new_problem_url(self, driver):
         """Get the URL of a problem we haven't solved yet."""
         already_solved = self.already_solved()
         while True:
             # Fetch random problem
-            driver.get(self.RANDOM_PROBLEM_URL)
+            driver.get(self.url or self.RANDOM_PROBLEM_URL)
 
             # Get question id
             id_ = -1
@@ -51,8 +67,8 @@ class LeetCodeScraper:
                 except NoSuchElementException:
                     time.sleep(1)
 
-            # Return if not already solved
-            if id_ not in already_solved:
+            # Return if URL was specified or random and not already solved
+            if self.url or (id_ not in already_solved):
                 return
 
     def parse_new_problem(self):
@@ -74,7 +90,7 @@ class LeetCodeScraper:
             try:
                 driver.find_element_by_css_selector(  # Open lang list
                     '#lang-select .ant-select-selection__rendered').click()
-                xpath = '/html/body/div[5]/div/div/div/ul/li[4]'  # Python 3
+                xpath = f'/html/body/div[5]/div/div/div/ul/li[{self.lang_ix + 1}]'
                 driver.find_element(By.XPATH, xpath).click()
                 elements = driver.find_elements_by_class_name('CodeMirror-line')
                 break
@@ -125,7 +141,6 @@ class LeetCodeProblem:
     def test_cases(self):
         """Parse test cases from the description."""
         test_cases = []
-        found_input = False
         for line in self.description.split('\n'):
             if line.strip().startswith('Input'):
                 test_cases.append([self.parse_io(line)])
@@ -173,9 +188,10 @@ class LeetCodeProblem:
     def process_name(name):
         return name.strip().lower().replace(' ', '_').replace('-', '_')
 
-    def write_file(self):
+    def write_file(self, lang='Python3'):
         filename = f'lc_{self.id}_{self.name}.py'
-        with open(TEMPLATE_PATH) as f:
+        template_path = os.path.join(TEMPLATE_DIR, lang)
+        with open(template_path) as f:
             template = f.read()
 
         # Format text
@@ -190,6 +206,15 @@ class LeetCodeProblem:
 
 
 if __name__ == '__main__':
-    self = LeetCodeScraper()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--language', '-l', type=str, default='Python3',
+                        help='the desired solution language, case-insensitive')
+    parser.add_argument('--url', '-u', type=str, default=None,
+                        help='the desired problem URL, default random')
+    args = parser.parse_args()
+    language = LANGUAGES[
+        [l.lower() for l in LANGUAGES].index(args.language.lower())]
+
+    self = LeetCodeScraper(lang=language, url=args.url)
     path = self.parse_new_problem()
-    os.startfile(path)
+    print(path)
