@@ -9,7 +9,8 @@ from glob import glob
 
 from selenium import webdriver
 from selenium.common.exceptions import (
-    NoSuchElementException, ElementClickInterceptedException)
+    NoSuchElementException, ElementClickInterceptedException,
+    ElementNotInteractableException)
 from selenium.webdriver.common.by import By
 
 # Find directories and files
@@ -85,39 +86,44 @@ class LeetCodeScraper:
     def parse_new_problem(self):
         """Parse a single problem page into a file."""
         driver = self.driver
-        self.goto_new_problem_url(driver)
+        out_path = 'Error caught, no file written.'
 
-        # Get number and name
-        element = driver.find_element_by_id('question-title')
-        id_, name = element.text.split('.')
+        try:
+            self.goto_new_problem_url(driver)
 
-        # Get description
-        element = driver.find_element_by_class_name('content__u3I1')
-        description = element.text
+            # Get number and name
+            element = driver.find_element_by_id('question-title')
+            id_, name = element.text.split('.')
 
-        # Get code skeleton
-        elements = []
-        for __ in range(self.MAX_TRIES):
-            try:
-                driver.find_element_by_css_selector(  # Open lang list
-                    '#lang-select .ant-select-selection__rendered').click()
-                xpath = f'/html/body/div[5]/div/div/div/ul/li[{self.lang_ix + 1}]'
-                driver.find_element(By.XPATH, xpath).click()
-                elements = driver.find_elements_by_class_name('CodeMirror-line')
-                break
-            except (ElementClickInterceptedException, NoSuchElementException):
-                time.sleep(1)
+            # Get description
+            element = driver.find_element_by_class_name('content__u3I1')
+            description = element.text
 
-        code_skeleton = '\n'.join([e.text for e in elements])
+            # Get code skeleton
+            elements = []
+            for __ in range(self.MAX_TRIES):
+                try:
+                    driver.find_element_by_css_selector(  # Open lang list
+                        '#lang-select .ant-select-selection__rendered').click()
+                    xpath = f'/html/body/div[5]/div/div/div/ul/li[{self.lang_ix + 1}]'
+                    driver.find_element(By.XPATH, xpath).click()
+                    elements = driver.find_elements_by_class_name('CodeMirror-line')
+                    break
+                except (ElementClickInterceptedException, NoSuchElementException,
+                        ElementNotInteractableException):
+                    time.sleep(1)
 
-        # Write file
-        lcp = LeetCodeProblem(
-            id_, name, driver.current_url, description, code_skeleton,
-            lang=self.lang)
-        out_path = lcp.write_file()
+            code_skeleton = '\n'.join([e.text for e in elements])
 
-        # Close browser
-        driver.close()
+            # Write file
+            lcp = LeetCodeProblem(
+                id_, name, driver.current_url, description, code_skeleton,
+                lang=self.lang)
+            out_path = lcp.write_file()
+
+        finally:
+            # Close browser
+            driver.close()
 
         return out_path
 
@@ -136,6 +142,7 @@ class LeetCodeProblem:
         self.id = id_
         self.name = self.process_name(name)
         self.url = url
+        self.raw_description = description
         self.description = self.parse_description(description)
         self.code_skeleton = code_skeleton
         self.lang = lang
@@ -155,7 +162,7 @@ class LeetCodeProblem:
     def test_cases(self):
         """Parse test cases from the description."""
         test_cases = []
-        for line in self.description.split('\n'):
+        for line in self.raw_description.split('\n'):
             if line.strip().startswith('Input'):
                 test_cases.append([self.parse_io(line)])
             elif line.strip().startswith('Output'):
