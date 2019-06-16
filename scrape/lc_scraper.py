@@ -133,7 +133,8 @@ class LeetCodeScraper:
         modules = [
             os.path.basename(file)
             for file in glob(os.path.join(SOL_DIR, '*py'))]
-        return [re.search(r'(?<=lc_)[0-9]+', s)[0] for s in modules]
+        matches = [re.search(r'(?<=lc_)[0-9]+', s) for s in modules]
+        return [match[0] for match in matches if match]
 
 
 class LeetCodeProblem:
