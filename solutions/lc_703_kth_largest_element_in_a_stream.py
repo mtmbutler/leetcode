@@ -19,6 +19,9 @@ from typing import List
 class KthLargest:
     """A collection that keeps track of its kth-largest member.
 
+    Note that it doesn't actually remember the entire collection -- for
+    performance, it only keeps the largest k elements.
+
     Example:
         >>> obj = KthLargest(k=3, nums=[4, 5, 8, 2])
         >>> obj.add(3)   # [2, 3, 4, 5, 8]
@@ -33,9 +36,16 @@ class KthLargest:
         8
     """
     def __init__(self, k: int, nums: List[int]):
-        self.k = k
-        self.nums = nums
+        self.nums = sorted(nums)[-k:]
 
     def add(self, val: int) -> int:
-        self.nums.append(val)
-        return sorted(self.nums)[-self.k]
+        if val <= self.nums[0]:
+            return self.nums[0]
+        else:
+            self.nums = self.nums[1:]
+            for i, n in enumerate(self.nums):
+                if val < n:
+                    self.nums.insert(i, val)
+                    return self.nums[0]
+            self.nums.append(val)
+            return self.nums[0]
