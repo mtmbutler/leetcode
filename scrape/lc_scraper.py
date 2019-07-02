@@ -86,7 +86,6 @@ class LeetCodeScraper:
     def parse_new_problem(self):
         """Parse a single problem page into a file."""
         driver = self.driver
-        out_path = 'Error caught, no file written.'
 
         try:
             self.goto_new_problem_url(driver)
@@ -228,7 +227,7 @@ class LeetCodeProblem:
         return out_path
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--language', '-l', type=str, default='Python3',
                         help='the desired solution language, case-insensitive')
@@ -241,3 +240,7 @@ if __name__ == '__main__':
     self = LeetCodeScraper(lang=language, url=args.url)
     path = self.parse_new_problem()
     print(path)
+
+
+if __name__ == '__main__':
+    main()
