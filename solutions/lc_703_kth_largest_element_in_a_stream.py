@@ -22,7 +22,7 @@ class KthLargest:
     Note that it doesn't actually remember the entire collection -- for
     performance, it only keeps the largest k elements.
 
-    Example:
+    Example 1:
         >>> obj = KthLargest(k=3, nums=[4, 5, 8, 2])
         >>> obj.add(3)   # [2, 3, 4, 5, 8]
         4
@@ -34,18 +34,33 @@ class KthLargest:
         8
         >>> obj.add(4)   # [2, 3, 4, 4, 5, 5, 8, 9, 10]
         8
+
+    Example 2:
+        >>> obj = KthLargest(k=2, nums=[0])
+        >>> obj.add(-1)  # [-1, 0]
+        -1
+        >>> obj.add(1)   # [-1, 0, 1]
+        0
+        >>> obj.add(-2)  # [-2, -1, 0, 1]
+        0
+        >>> obj.add(-4)  # [-4, -2, -1, 0, 1]
+        0
+        >>> obj.add(3)   # [-4, -2, -1, 0, 1, 3]
+        1
     """
     def __init__(self, k: int, nums: List[int]):
+        self.k = k
         self.nums = sorted(nums)[-k:]
 
     def add(self, val: int) -> int:
-        if val <= self.nums[0]:
-            return self.nums[0]
-        else:
+        if len(self.nums) < self.k:
+            self.nums.append(val)
+            self.nums.sort()
+        elif val > self.nums[0]:
             self.nums = self.nums[1:]
             for i, n in enumerate(self.nums):
                 if val < n:
                     self.nums.insert(i, val)
                     return self.nums[0]
             self.nums.append(val)
-            return self.nums[0]
+        return self.nums[0]
